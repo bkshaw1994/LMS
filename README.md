@@ -126,6 +126,18 @@ npm run dev
 ```
 The Next.js application will run on `http://localhost:3000`.
 
+### 4. Running Both Applications Together (Root Directory)
+```bash
+# Install dependencies for root workspace and sub-projects
+npm run install:all
+npm install
+
+# Start both Express Backend (Port 5001) and Next.js Frontend (Port 3000) simultaneously
+npm run dev
+```
+- **Frontend (Next.js)**: `http://localhost:3000`
+- **Backend API (Express)**: `http://localhost:5001`
+
 ---
 
 ## 🗺️ 12-Week Curriculum Syllabus

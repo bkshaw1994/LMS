@@ -1,0 +1,19 @@
+{
+  "name": "lms-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FullStack Pro LMS - Root manager to run client and server together",
+  "scripts": {
+    "dev": "concurrently -n \"client,server\" -c \"cyan.bold,yellow.bold\" \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "start": "concurrently -n \"client,server\" -c \"cyan.bold,yellow.bold\" \"npm run start --prefix client\" \"npm run start --prefix server\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "start:client": "npm run start --prefix client",
+    "start:server": "npm run start --prefix server",
+    "install:all": "npm install --prefix client && npm install --prefix server",
+    "seed": "npm run seed --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

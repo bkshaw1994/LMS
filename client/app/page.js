@@ -44,10 +44,6 @@ const faqs = [
     q: 'Can I study at my own pace?',
     a: 'Yes, the curriculum is 100% self-paced. Modules are unlocked sequentially as you complete each week\'s lessons, assignment, and quiz.',
   },
-  {
-    q: 'Will I receive a certificate upon completion?',
-    a: 'Yes! Upon completing all 12 weeks and passing all weekly tests, you will earn a verified Full-Stack Software Engineer Certificate.',
-  },
 ];
 
 export default function LandingPage() {
@@ -264,14 +260,10 @@ export default function LandingPage() {
                       Syllabus Topics ({module.lessons ? module.lessons.length : 0} Lessons)
                     </span>
 
-                    <ul className="space-y-2 text-xs text-slate-700">
+                    <ul className="space-y-1.5 text-xs text-slate-700 list-disc pl-4 font-medium">
                       {module.lessons && module.lessons.map((lesson, idx) => (
-                        <li key={idx} className="flex items-start space-x-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="font-semibold text-slate-900">{lesson.title}</p>
-                            <span className="text-[10px] text-slate-500 font-medium">{lesson.duration || '45 mins'}</span>
-                          </div>
+                        <li key={idx}>
+                          {lesson.title}
                         </li>
                       ))}
                     </ul>

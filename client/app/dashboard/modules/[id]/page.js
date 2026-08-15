@@ -313,7 +313,6 @@ export default function ModuleDetailsPage() {
                 <span className="text-indigo-400 font-bold">Now Playing (Lesson {selectedLessonIndex + 1}):</span>
                 <span className="text-white font-extrabold">{activeLesson?.title}</span>
               </div>
-              <span className="text-slate-400 font-medium">Duration: {activeLesson?.duration || '45 mins'}</span>
             </div>
           </div>
 
@@ -443,7 +442,6 @@ export default function ModuleDetailsPage() {
                           }`}>
                             {lesson.title}
                           </h4>
-                          <span className="text-[11px] text-slate-500 font-semibold">{lesson.duration || '45 mins'}</span>
                         </div>
                       </div>
 
