@@ -64,7 +64,7 @@ mongoose
     let trainerUser = await User.findOne({ email: testEmail, role: 'trainer' }).select('+password');
     if (!trainerUser) {
       console.log(`Seeding trainer account for ${testEmail}...`);
-      await User.create({
+      trainerUser = await User.create({
         name: 'Bishal Kumar Shaw',
         email: testEmail,
         password: 'C0gniz@nt@09071994',
@@ -85,7 +85,7 @@ mongoose
     let studentUser = await User.findOne({ email: testEmail, role: 'student' }).select('+password');
     if (!studentUser) {
       console.log(`Seeding student account for ${testEmail}...`);
-      await User.create({
+      studentUser = await User.create({
         name: 'Bishal Kumar Shaw',
         email: testEmail,
         password: 'C0gniz@nt@09071994',
@@ -96,6 +96,63 @@ mongoose
     } else {
       console.log(`Student account (${testEmail}) verified successfully!`);
     }
+
+    // 3. Seed 100% Completion Progress, Submissions, and Test Marks for Student Bishal Kumar Shaw
+    const Progress = require('./models/Progress');
+    const Submission = require('./models/Submission');
+    const QuizResult = require('./models/QuizResult');
+    const allModules = await CourseModule.find().sort({ weekNumber: 1 });
+
+    for (const mod of allModules) {
+      const lessonIds = (mod.lessons || []).map((l) => l._id);
+
+      // Upsert 100% Lesson Progress
+      await Progress.findOneAndUpdate(
+        { user: studentUser._id, module: mod._id },
+        {
+          user: studentUser._id,
+          module: mod._id,
+          completedLessons: lessonIds,
+          isModuleCompleted: true,
+          updatedAt: Date.now(),
+        },
+        { upsert: true, new: true }
+      );
+
+      // Upsert GitHub Assignment Project Submission
+      await Submission.findOneAndUpdate(
+        { user: studentUser._id, module: mod._id },
+        {
+          user: studentUser._id,
+          module: mod._id,
+          githubUrl: `https://github.com/b-kumar-shaw/lms-bootcamp-week-${mod.weekNumber}`,
+          notes: `Week ${mod.weekNumber} full-stack project completed with 100% test coverage.`,
+          status: 'submitted',
+          score: 100,
+          submittedAt: Date.now(),
+        },
+        { upsert: true, new: true }
+      );
+
+      // Upsert 100% Weekly Knowledge Test Marks
+      await QuizResult.findOneAndUpdate(
+        { user: studentUser._id, module: mod._id },
+        {
+          user: studentUser._id,
+          module: mod._id,
+          score: 100,
+          passed: true,
+          answers: (mod.quiz?.questions || []).map((q) => ({
+            questionId: q.id,
+            selectedOption: q.correctAnswer,
+            isCorrect: true,
+          })),
+          completedAt: Date.now(),
+        },
+        { upsert: true, new: true }
+      );
+    }
+    console.log(`Successfully seeded 100% completion progress, GitHub repos, and 100% test marks for student ${testEmail}!`);
   })
   .catch((err) => {
     console.warn('MongoDB connection warning:', err.message);

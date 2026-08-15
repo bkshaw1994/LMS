@@ -36,6 +36,7 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
     const modules = await CourseModule.find().sort({ weekNumber: 1 });
     let totalCourseLessons = 0;
     const moduleLessonCounts = {};
+    const moduleWeekLookup = {};
     modules.forEach((mod) => {
       const count = mod.lessons ? mod.lessons.length : 0;
       totalCourseLessons += count;
@@ -44,6 +45,7 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
         title: mod.title,
         lessonCount: count,
       };
+      moduleWeekLookup[mod.weekNumber] = mod._id.toString();
     });
 
     if (totalCourseLessons === 0) totalCourseLessons = 48;
@@ -54,9 +56,9 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
       const studentId = student._id;
 
       const [progressList, submissionsList, quizList] = await Promise.all([
-        Progress.find({ userId: studentId }),
-        Submission.find({ userId: studentId }),
-        QuizResult.find({ userId: studentId }),
+        Progress.find({ $or: [{ user: studentId }, { userId: studentId }] }),
+        Submission.find({ $or: [{ user: studentId }, { userId: studentId }] }),
+        QuizResult.find({ $or: [{ user: studentId }, { userId: studentId }] }),
       ]);
 
       let completedLessonsCount = 0;
@@ -66,7 +68,8 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
         const completedCount = p.completedLessons ? p.completedLessons.length : 0;
         completedLessonsCount += completedCount;
 
-        const modInfo = moduleLessonCounts[p.moduleId.toString()];
+        const modIdStr = (p.module || p.moduleId || '').toString();
+        const modInfo = moduleLessonCounts[modIdStr];
         if (modInfo) {
           progressByWeek[modInfo.weekNumber] = {
             completedCount,
@@ -80,10 +83,15 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
 
       const submissionsByWeek = {};
       submissionsList.forEach((sub) => {
-        submissionsByWeek[sub.weekNumber] = {
-          submissionUrl: sub.submissionUrl,
-          submittedAt: sub.submittedAt,
-        };
+        const modIdStr = (sub.module || sub.moduleId || '').toString();
+        const modInfo = moduleLessonCounts[modIdStr];
+        const weekNum = sub.weekNumber || (modInfo ? modInfo.weekNumber : null);
+        if (weekNum) {
+          submissionsByWeek[weekNum] = {
+            submissionUrl: sub.githubUrl || sub.submissionUrl,
+            submittedAt: sub.submittedAt,
+          };
+        }
       });
 
       const quizzesByWeek = {};
@@ -92,14 +100,20 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
 
       quizList.forEach((q) => {
         if (q.passed) totalPassedQuizzes++;
-        totalQuizScoreSum += q.percentage || 0;
-        quizzesByWeek[q.weekNumber] = {
-          score: q.score,
-          totalQuestions: q.totalQuestions,
-          percentage: q.percentage,
-          passed: q.passed,
-          attemptedAt: q.attemptedAt,
-        };
+        totalQuizScoreSum += (q.score !== undefined ? q.score : q.percentage || 0);
+
+        const modIdStr = (q.module || q.moduleId || '').toString();
+        const modInfo = moduleLessonCounts[modIdStr];
+        const weekNum = q.weekNumber || (modInfo ? modInfo.weekNumber : null);
+        if (weekNum) {
+          quizzesByWeek[weekNum] = {
+            score: q.score,
+            totalQuestions: 4,
+            percentage: q.score !== undefined ? q.score : q.percentage,
+            passed: q.passed,
+            attemptedAt: q.completedAt || q.attemptedAt,
+          };
+        }
       });
 
       const avgQuizPercentage = quizList.length > 0 ? Math.round(totalQuizScoreSum / quizList.length) : 0;
@@ -190,9 +204,9 @@ router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) =
     const studentId = student._id;
     const modules = await CourseModule.find().sort({ weekNumber: 1 });
     const [progressList, submissionsList, quizList] = await Promise.all([
-      Progress.find({ userId: studentId }),
-      Submission.find({ userId: studentId }),
-      QuizResult.find({ userId: studentId }),
+      Progress.find({ $or: [{ user: studentId }, { userId: studentId }] }),
+      Submission.find({ $or: [{ user: studentId }, { userId: studentId }] }),
+      QuizResult.find({ $or: [{ user: studentId }, { userId: studentId }] }),
     ]);
 
     let totalCourseLessons = 0;
@@ -200,30 +214,51 @@ router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) =
 
     const progressMap = {};
     progressList.forEach((p) => {
-      progressMap[p.moduleId.toString()] = p.completedLessons || [];
+      const modIdStr = (p.module || p.moduleId || '').toString();
+      progressMap[modIdStr] = p.completedLessons || [];
       completedLessonsCount += (p.completedLessons ? p.completedLessons.length : 0);
     });
 
     const submissionsMap = {};
     submissionsList.forEach((s) => {
-      submissionsMap[s.weekNumber] = s;
+      const modIdStr = (s.module || s.moduleId || '').toString();
+      if (modIdStr) submissionsMap[modIdStr] = s;
+      if (s.weekNumber) submissionsMap[`week_${s.weekNumber}`] = s;
     });
 
     const quizMap = {};
     let passedQuizCount = 0;
     let totalScoreSum = 0;
     quizList.forEach((q) => {
-      quizMap[q.weekNumber] = q;
+      const modIdStr = (q.module || q.moduleId || '').toString();
+      if (modIdStr) quizMap[modIdStr] = q;
+      if (q.weekNumber) quizMap[`week_${q.weekNumber}`] = q;
+
       if (q.passed) passedQuizCount++;
-      totalScoreSum += (q.percentage || 0);
+      totalScoreSum += (q.score !== undefined ? q.score : q.percentage || 0);
     });
 
     const weeksData = modules.map((mod) => {
       const lessonCount = mod.lessons ? mod.lessons.length : 0;
       totalCourseLessons += lessonCount;
-      const completed = progressMap[mod._id.toString()] || [];
-      const sub = submissionsMap[mod.weekNumber] || null;
-      const quiz = quizMap[mod.weekNumber] || null;
+
+      const modIdStr = mod._id.toString();
+      const completed = progressMap[modIdStr] || [];
+
+      // Find submission by module id or weekNumber
+      const sub = submissionsMap[modIdStr] || submissionsMap[`week_${mod.weekNumber}`] || null;
+
+      // Find quiz result by module id or weekNumber
+      const quiz = quizMap[modIdStr] || quizMap[`week_${mod.weekNumber}`] || null;
+
+      // Format lesson completion check
+      const lessonTitleList = (mod.lessons || []).map((l) => l.title);
+      const completedLessonTitles = completed.map((item) => {
+        if (typeof item === 'string') return item;
+        // If stored as ObjectId, match with lesson._id or title
+        const match = (mod.lessons || []).find((l) => l._id && l._id.toString() === item.toString());
+        return match ? match.title : item.toString();
+      });
 
       return {
         weekNumber: mod.weekNumber,
@@ -231,19 +266,19 @@ router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) =
         category: mod.category,
         totalLessons: lessonCount,
         lessons: mod.lessons || [],
-        completedLessons: completed,
-        completedCount: completed.length,
-        isLessonsFinished: completed.length >= lessonCount && lessonCount > 0,
+        completedLessons: completedLessonTitles,
+        completedCount: completedLessonTitles.length,
+        isLessonsFinished: completedLessonTitles.length >= lessonCount && lessonCount > 0,
         submission: sub ? {
-          submissionUrl: sub.submissionUrl,
+          submissionUrl: sub.githubUrl || sub.submissionUrl,
           submittedAt: sub.submittedAt,
         } : null,
         quizResult: quiz ? {
           score: quiz.score,
-          totalQuestions: quiz.totalQuestions,
-          percentage: quiz.percentage,
+          totalQuestions: 4,
+          percentage: quiz.score !== undefined ? quiz.score : quiz.percentage,
           passed: quiz.passed,
-          attemptedAt: quiz.attemptedAt,
+          attemptedAt: quiz.completedAt || quiz.attemptedAt,
         } : null,
       };
     });
