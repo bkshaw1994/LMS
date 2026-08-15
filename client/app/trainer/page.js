@@ -108,15 +108,6 @@ export default function TrainerPage() {
     return true;
   }) || [];
 
-  if (authLoading) {
-    return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
-        <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
-        <p className="text-sm font-semibold text-slate-600">Verifying Trainer Credentials...</p>
-      </div>
-    );
-  }
-
   // Render Trainer Login Screen if user is not authenticated or not a trainer
   if (!user || !isTrainerRole) {
     return (
