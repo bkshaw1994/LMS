@@ -83,7 +83,7 @@ export default function Navbar() {
                       <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
                     </div>
 
-                    {(user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor') && (
+                    {(user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor') ? (
                       <Link
                         href="/trainer"
                         onClick={() => setDropdownOpen(false)}
@@ -92,25 +92,27 @@ export default function Navbar() {
                         <Sparkles className="w-4 h-4 text-indigo-600" />
                         <span>Instructor Portal</span>
                       </Link>
+                    ) : (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-indigo-600" />
+                          <span>Student Portal</span>
+                        </Link>
+
+                        <Link
+                          href="/dashboard/profile"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-slate-500" />
+                          <span>My Profile</span>
+                        </Link>
+                      </>
                     )}
-
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-indigo-600" />
-                      <span>Student Portal</span>
-                    </Link>
-
-                    <Link
-                      href="/dashboard/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
-                    >
-                      <User className="w-4 h-4 text-slate-500" />
-                      <span>My Profile</span>
-                    </Link>
 
                     <div className="border-t border-slate-100 my-1"></div>
 
@@ -181,7 +183,7 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {(user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor') && (
+              {(user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor') ? (
                 <Link
                   href="/trainer"
                   onClick={() => setMobileMenuOpen(false)}
@@ -190,25 +192,27 @@ export default function Navbar() {
                   <Sparkles className="w-4 h-4 text-indigo-600" />
                   <span>Instructor Portal</span>
                 </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center space-x-2 text-indigo-700 bg-indigo-50 border border-indigo-200 px-4 py-3 rounded-xl text-sm font-bold"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-indigo-600" />
+                    <span>Student Portal</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center space-x-2 text-slate-700 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold"
+                  >
+                    <User className="w-4 h-4 text-slate-500" />
+                    <span>My Profile</span>
+                  </Link>
+                </>
               )}
-
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center space-x-2 text-slate-700 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold"
-              >
-                <LayoutDashboard className="w-4 h-4 text-indigo-600" />
-                <span>Student Portal</span>
-              </Link>
-
-              <Link
-                href="/dashboard/profile"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center space-x-2 text-slate-700 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold"
-              >
-                <User className="w-4 h-4 text-slate-500" />
-                <span>My Profile</span>
-              </Link>
 
               <button
                 onClick={() => {

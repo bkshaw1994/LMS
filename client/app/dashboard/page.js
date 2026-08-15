@@ -23,18 +23,24 @@ import {
 } from 'lucide-react';
 
 export default function StudentDashboard() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [modules, setModules] = useState([]);
   const [progressData, setProgressData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isTrainer = user && (user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor');
+
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
+    if (!authLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (isTrainer) {
+        router.push('/trainer');
+      }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, isTrainer, router]);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -58,6 +64,36 @@ export default function StudentDashboard() {
       loadDashboard();
     }
   }, [user]);
+
+  if (isTrainer) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-dot-pattern">
+        <div className="w-full max-w-md space-y-6 text-center">
+          <div className="w-16 h-16 rounded-3xl bg-indigo-50 border border-indigo-200 flex items-center justify-center mx-auto text-indigo-600 shadow-sm">
+            <Zap className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Trainer Portal Active</h1>
+          <p className="text-slate-600 text-xs font-medium leading-relaxed max-w-sm mx-auto">
+            You are currently logged in as a Trainer (<strong>{user?.name}</strong>). Trainers cannot view student portal pages.
+          </p>
+          <div className="flex flex-col space-y-2.5 pt-2">
+            <Link
+              href="/trainer"
+              className="w-full gradient-bg-indigo text-white font-black py-3.5 rounded-xl text-xs shadow-md shadow-indigo-500/20"
+            >
+              Go to Trainer Executive Portal
+            </Link>
+            <button
+              onClick={logout}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-sm"
+            >
+              Sign Out & Switch Account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (authLoading || loading) {
     return (

@@ -21,8 +21,12 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      const loggedUser = await login(email, password);
+      if (loggedUser && (loggedUser.role === 'trainer' || loggedUser.role === 'admin' || loggedUser.role === 'instructor')) {
+        router.push('/trainer');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {

@@ -83,7 +83,8 @@ export default function TrainerPage() {
       const loggedUser = await login(email, password);
       if (loggedUser) {
         if (loggedUser.role !== 'trainer' && loggedUser.role !== 'admin' && loggedUser.role !== 'instructor') {
-          setLoginError('Access Denied: Account does not have Trainer privileges.');
+          logout();
+          setLoginError('Access Denied: This account is a Student account and cannot access the Trainer Portal. Please use a designated Trainer account.');
         }
       }
     } catch (err) {
@@ -114,6 +115,37 @@ export default function TrainerPage() {
     if (student.slug) return student.slug;
     return encodeURIComponent(student.name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'));
   };
+
+  // Render Access Restricted card if user is logged in as a student
+  if (user && user.role === 'student') {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-dot-pattern">
+        <div className="w-full max-w-md space-y-6 text-center">
+          <div className="w-16 h-16 rounded-3xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-sm">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Access Restricted</h1>
+          <p className="text-slate-600 text-xs font-medium leading-relaxed max-w-sm mx-auto">
+            You are currently logged in as a Student (<strong>{user.name}</strong>). Student accounts cannot access the Trainer Portal.
+          </p>
+          <div className="flex flex-col space-y-2.5 pt-2">
+            <Link
+              href="/dashboard"
+              className="w-full gradient-bg-indigo text-white font-black py-3.5 rounded-xl text-xs shadow-md shadow-indigo-500/20"
+            >
+              Return to Student Dashboard
+            </Link>
+            <button
+              onClick={logout}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-sm"
+            >
+              Sign Out & Switch Account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render Trainer Login Screen if user is not authenticated or not a trainer
   if (!user || !isTrainerRole) {
