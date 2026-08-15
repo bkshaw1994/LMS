@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '../../lib/authContext';
 import { fetchApi } from '../../lib/api';
 import {
@@ -358,8 +359,8 @@ export default function TrainerPage() {
                   <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Student Info */}
                     <td className="py-4 px-6">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-xs overflow-hidden flex-shrink-0">
+                      <Link href={`/trainer/student/${student.id}`} className="flex items-center space-x-3 group">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-xs overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
                           {student.avatar ? (
                             <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
                           ) : (
@@ -367,10 +368,10 @@ export default function TrainerPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{student.name}</p>
+                          <p className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">{student.name}</p>
                           <p className="text-slate-500 text-[11px]">{student.email}</p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
 
                     {/* Rank Badge */}
@@ -417,13 +418,13 @@ export default function TrainerPage() {
 
                     {/* Actions */}
                     <td className="py-4 px-6 text-right">
-                      <button
-                        onClick={() => setSelectedStudent(student)}
+                      <Link
+                        href={`/trainer/student/${student.id}`}
                         className="inline-flex items-center space-x-1.5 gradient-bg-indigo text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs hover:scale-105 transition-all"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect Progress</span>
-                      </button>
+                        <span>Inspect Progress & Marks</span>
+                      </Link>
                     </td>
                   </tr>
                 ))}

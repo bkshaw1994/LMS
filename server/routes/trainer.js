@@ -27,7 +27,6 @@ const authorizeTrainer = async (req, res, next) => {
 // @access  Private (Trainer/Admin only)
 router.get('/students', protect, authorizeTrainer, async (req, res) => {
   try {
-    // 1. Fetch total available course modules and calculate total course lessons
     const modules = await CourseModule.find().sort({ weekNumber: 1 });
     let totalCourseLessons = 0;
     const moduleLessonCounts = {};
@@ -41,12 +40,10 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
       };
     });
 
-    if (totalCourseLessons === 0) totalCourseLessons = 48; // fallback standard count
+    if (totalCourseLessons === 0) totalCourseLessons = 48;
 
-    // 2. Fetch all student users
     const students = await User.find({ role: 'student' }).select('-password').sort({ createdAt: -1 });
 
-    // 3. For each student, aggregate progress, submissions, and quiz results
     const studentDataPromises = students.map(async (student) => {
       const studentId = student._id;
 
@@ -56,7 +53,6 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
         QuizResult.find({ userId: studentId }),
       ]);
 
-      // Calculate total completed lessons count across modules
       let completedLessonsCount = 0;
       const progressByWeek = {};
 
@@ -74,10 +70,8 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
         }
       });
 
-      // Calculate overall completion percentage
       const overallPercentage = Math.min(100, Math.round((completedLessonsCount / totalCourseLessons) * 100));
 
-      // Aggregate submissions
       const submissionsByWeek = {};
       submissionsList.forEach((sub) => {
         submissionsByWeek[sub.weekNumber] = {
@@ -86,7 +80,6 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
         };
       });
 
-      // Aggregate quizzes
       const quizzesByWeek = {};
       let totalPassedQuizzes = 0;
       let totalQuizScoreSum = 0;
@@ -105,7 +98,6 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
 
       const avgQuizPercentage = quizList.length > 0 ? Math.round(totalQuizScoreSum / quizList.length) : 0;
 
-      // Determine Student Status Rank Badge
       let rank = 'Novice Developer';
       if (overallPercentage >= 100) rank = 'Full-Stack Master';
       else if (overallPercentage >= 75) rank = 'Senior Specialist';
@@ -138,7 +130,6 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
 
     const studentsDetailed = await Promise.all(studentDataPromises);
 
-    // 4. Calculate Executive Cohort Summary
     const totalStudents = studentsDetailed.length;
     const avgCohortCompletion = totalStudents > 0
       ? Math.round(studentsDetailed.reduce((acc, s) => acc + s.metrics.overallPercentage, 0) / totalStudents)
@@ -160,6 +151,116 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
   } catch (error) {
     console.error('Error fetching trainer student metrics:', error);
     res.status(500).json({ success: false, message: 'Server error loading trainer data', error: error.message });
+  }
+});
+
+// @route   GET /api/trainer/student/:id
+// @desc    Get detailed progress, submissions, and quiz test marks for a single student
+// @access  Private (Trainer/Admin only)
+router.get('/student/:id', protect, authorizeTrainer, async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const student = await User.findById(studentId).select('-password');
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    const modules = await CourseModule.find().sort({ weekNumber: 1 });
+    const [progressList, submissionsList, quizList] = await Promise.all([
+      Progress.find({ userId: studentId }),
+      Submission.find({ userId: studentId }),
+      QuizResult.find({ userId: studentId }),
+    ]);
+
+    let totalCourseLessons = 0;
+    let completedLessonsCount = 0;
+
+    const progressMap = {};
+    progressList.forEach((p) => {
+      progressMap[p.moduleId.toString()] = p.completedLessons || [];
+      completedLessonsCount += (p.completedLessons ? p.completedLessons.length : 0);
+    });
+
+    const submissionsMap = {};
+    submissionsList.forEach((s) => {
+      submissionsMap[s.weekNumber] = s;
+    });
+
+    const quizMap = {};
+    let passedQuizCount = 0;
+    let totalScoreSum = 0;
+    quizList.forEach((q) => {
+      quizMap[q.weekNumber] = q;
+      if (q.passed) passedQuizCount++;
+      totalScoreSum += (q.percentage || 0);
+    });
+
+    const weeksData = modules.map((mod) => {
+      const lessonCount = mod.lessons ? mod.lessons.length : 0;
+      totalCourseLessons += lessonCount;
+      const completed = progressMap[mod._id.toString()] || [];
+      const sub = submissionsMap[mod.weekNumber] || null;
+      const quiz = quizMap[mod.weekNumber] || null;
+
+      return {
+        weekNumber: mod.weekNumber,
+        title: mod.title,
+        category: mod.category,
+        totalLessons: lessonCount,
+        lessons: mod.lessons || [],
+        completedLessons: completed,
+        completedCount: completed.length,
+        isLessonsFinished: completed.length >= lessonCount && lessonCount > 0,
+        submission: sub ? {
+          submissionUrl: sub.submissionUrl,
+          submittedAt: sub.submittedAt,
+        } : null,
+        quizResult: quiz ? {
+          score: quiz.score,
+          totalQuestions: quiz.totalQuestions,
+          percentage: quiz.percentage,
+          passed: quiz.passed,
+          attemptedAt: quiz.attemptedAt,
+        } : null,
+      };
+    });
+
+    if (totalCourseLessons === 0) totalCourseLessons = 48;
+    const overallPercentage = Math.min(100, Math.round((completedLessonsCount / totalCourseLessons) * 100));
+    const avgQuizScore = quizList.length > 0 ? Math.round(totalScoreSum / quizList.length) : 0;
+
+    let rank = 'Novice Developer';
+    if (overallPercentage >= 100) rank = 'Full-Stack Master';
+    else if (overallPercentage >= 75) rank = 'Senior Specialist';
+    else if (overallPercentage >= 50) rank = 'Intermediate Specialist';
+    else if (overallPercentage >= 25) rank = 'Junior Specialist';
+
+    res.status(200).json({
+      success: true,
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        mobile: student.mobile || 'N/A',
+        avatar: student.avatar || '',
+        resumeUrl: student.resumeUrl || '',
+        createdAt: student.createdAt,
+        rank,
+        metrics: {
+          overallPercentage,
+          completedLessonsCount,
+          totalCourseLessons,
+          assignmentsSubmittedCount: submissionsList.length,
+          quizzesPassedCount: passedQuizCount,
+          quizzesAttemptedCount: quizList.length,
+          avgQuizScore,
+        },
+        weeks: weeksData,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching single student details for trainer:', error);
+    res.status(500).json({ success: false, message: 'Server error loading student details', error: error.message });
   }
 });
 
