@@ -273,13 +273,21 @@ router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) =
           submissionUrl: sub.githubUrl || sub.submissionUrl,
           submittedAt: sub.submittedAt,
         } : null,
-        quizResult: quiz ? {
-          score: quiz.score,
-          totalQuestions: 4,
-          percentage: quiz.score !== undefined ? quiz.score : quiz.percentage,
-          passed: quiz.passed,
-          attemptedAt: quiz.completedAt || quiz.attemptedAt,
-        } : null,
+        quizResult: quiz ? (() => {
+          const totalQ = (quiz.answers && quiz.answers.length > 0) ? quiz.answers.length : (mod.quiz?.questions?.length || 4);
+          const correctQ = (quiz.answers && quiz.answers.length > 0)
+            ? quiz.answers.filter(a => a.isCorrect).length
+            : (quiz.score <= totalQ ? quiz.score : totalQ);
+          const pct = quiz.percentage !== undefined ? quiz.percentage : (quiz.score > totalQ ? quiz.score : Math.round((correctQ / totalQ) * 100));
+          return {
+            score: correctQ,
+            rawScore: correctQ,
+            totalQuestions: totalQ,
+            percentage: pct,
+            passed: quiz.passed,
+            attemptedAt: quiz.completedAt || quiz.attemptedAt,
+          };
+        })() : null,
       };
     });
 
