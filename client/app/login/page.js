@@ -25,7 +25,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -35,9 +35,12 @@ export default function LoginPage() {
 
     try {
       const loggedUser = await login(email, password);
-      if (loggedUser && (loggedUser.role === 'trainer' || loggedUser.role === 'admin' || loggedUser.role === 'instructor')) {
-        router.push('/trainer');
-      } else {
+      if (loggedUser) {
+        if (loggedUser.role === 'trainer' || loggedUser.role === 'admin' || loggedUser.role === 'instructor') {
+          logout();
+          setError('Access Denied: Trainer accounts cannot log in through the Student Login page. Please use the Trainer Login portal.');
+          return;
+        }
         router.push('/dashboard');
       }
     } catch (err) {
