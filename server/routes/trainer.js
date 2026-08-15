@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Progress = require('../models/Progress');
 const Submission = require('../models/Submission');
@@ -7,6 +8,11 @@ const CourseModule = require('../models/CourseModule');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Helper to create URL slug from student name
+const slugifyName = (name) => {
+  return (name || '').toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+};
 
 // Middleware to authorize trainer / instructor / admin roles
 const authorizeTrainer = async (req, res, next) => {
@@ -107,6 +113,7 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
       return {
         id: student._id,
         name: student.name,
+        slug: slugifyName(student.name),
         email: student.email,
         mobile: student.mobile || 'N/A',
         avatar: student.avatar || '',
@@ -154,17 +161,33 @@ router.get('/students', protect, authorizeTrainer, async (req, res) => {
   }
 });
 
-// @route   GET /api/trainer/student/:id
-// @desc    Get detailed progress, submissions, and quiz test marks for a single student
+// @route   GET /api/trainer/student/:identifier
+// @desc    Get detailed progress, submissions, and quiz test marks for a single student by ID or Name Slug
 // @access  Private (Trainer/Admin only)
-router.get('/student/:id', protect, authorizeTrainer, async (req, res) => {
+router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) => {
   try {
-    const studentId = req.params.id;
-    const student = await User.findById(studentId).select('-password');
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
+    const identifier = req.params.identifier;
+    let student = null;
+
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      student = await User.findById(identifier).select('-password');
     }
 
+    if (!student) {
+      const decodedParam = decodeURIComponent(identifier).toLowerCase().trim();
+      const allStudents = await User.find({ role: 'student' }).select('-password');
+      student = allStudents.find((s) => {
+        const slug = slugifyName(s.name);
+        const cleanName = s.name.toLowerCase().replace(/\s+/g, ' ');
+        return slug === decodedParam || cleanName === decodedParam || s._id.toString() === identifier;
+      });
+    }
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student record not found' });
+    }
+
+    const studentId = student._id;
     const modules = await CourseModule.find().sort({ weekNumber: 1 });
     const [progressList, submissionsList, quizList] = await Promise.all([
       Progress.find({ userId: studentId }),
@@ -240,6 +263,7 @@ router.get('/student/:id', protect, authorizeTrainer, async (req, res) => {
       student: {
         id: student._id,
         name: student.name,
+        slug: slugifyName(student.name),
         email: student.email,
         mobile: student.mobile || 'N/A',
         avatar: student.avatar || '',

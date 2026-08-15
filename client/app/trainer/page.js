@@ -27,7 +27,8 @@ import {
   Sparkles,
   ChevronRight,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  ArrowUpRight
 } from 'lucide-react';
 
 export default function TrainerPage() {
@@ -45,7 +46,6 @@ export default function TrainerPage() {
   const [dataError, setDataError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Check if current logged-in user is a trainer / instructor / admin
   const isTrainerRole = user && (user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor');
@@ -109,6 +109,12 @@ export default function TrainerPage() {
     return true;
   }) || [];
 
+  // Helper to generate name slug for routing
+  const getStudentSlug = (student) => {
+    if (student.slug) return student.slug;
+    return encodeURIComponent(student.name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'));
+  };
+
   // Render Trainer Login Screen if user is not authenticated or not a trainer
   if (!user || !isTrainerRole) {
     return (
@@ -116,16 +122,16 @@ export default function TrainerPage() {
         <div className="w-full max-w-md space-y-6">
           {/* Header Badge */}
           <div className="text-center space-y-3">
-            <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-900 text-indigo-400 border border-slate-800 shadow-md">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900 text-indigo-400 border border-slate-800 shadow-md">
               <ShieldCheck className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold tracking-wide uppercase">Trainer & Portal Control</span>
+              <span className="text-xs font-extrabold tracking-wider uppercase">Instructor Portal Control</span>
             </div>
 
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Instructor Portal Sign In
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+              Trainer Sign In
             </h1>
-            <p className="text-slate-600 text-xs font-medium">
-              Access cohort dashboard, track student progress, review assignments & test results.
+            <p className="text-slate-600 text-xs font-medium leading-relaxed">
+              Access executive cohort metrics, track student progress, inspect GitHub repositories & evaluate test marks.
             </p>
           </div>
 
@@ -152,7 +158,7 @@ export default function TrainerPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="trainer@lms.com"
+                    placeholder="b.kumarshaw94@gmail.com"
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm font-medium text-slate-900 bg-slate-50/50"
                   />
                 </div>
@@ -180,7 +186,7 @@ export default function TrainerPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-2 inline-flex items-center justify-center space-x-2 gradient-bg-indigo text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md shadow-indigo-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
+                className="w-full mt-2 inline-flex items-center justify-center space-x-2 gradient-bg-indigo text-white font-black py-3.5 rounded-xl text-sm shadow-md shadow-indigo-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
               >
                 {isSubmitting ? (
                   <>
@@ -205,94 +211,99 @@ export default function TrainerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Banner & Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-slate-200">
-        <div>
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Trainer Executive Portal</span>
-            </span>
-            <span className="text-slate-400 text-xs font-medium">• 12-Week Cohort Monitoring</span>
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-extrabold border border-indigo-400/30">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Executive Lead Instructor Control</span>
+              </span>
+              <span className="text-slate-400 text-xs font-semibold">• 12-Week Bootcamp Intelligence</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+              Student Cohort Analytics Dashboard
+            </h1>
+            <p className="text-slate-300 text-xs sm:text-sm font-medium max-w-2xl leading-relaxed">
+              Real-time monitoring of enrolled student lesson progression, GitHub repository submissions, and weekly test marks. Click any student to open their detailed workspace.
+            </p>
           </div>
 
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Student Cohort Executive Dashboard
-          </h1>
-          <p className="text-slate-600 text-sm font-medium mt-1">
-            Real-time view of student lesson completions, GitHub assignment submissions, and quiz performance.
-          </p>
-        </div>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={loadTrainerData}
+              disabled={loadingData}
+              className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs border border-white/20 shadow-xs transition-all"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? 'animate-spin' : ''}`} />
+              <span>Refresh Roster</span>
+            </button>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={loadTrainerData}
-            disabled={loadingData}
-            className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-200 shadow-2xs transition-all"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? 'animate-spin' : ''}`} />
-            <span>Refresh Roster</span>
-          </button>
-
-          <button
-            onClick={logout}
-            className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5 text-red-400" />
-            <span>Trainer Logout</span>
-          </button>
+            <button
+              onClick={logout}
+              className="inline-flex items-center space-x-2 bg-red-600/80 hover:bg-red-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Trainer Logout</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Cohort Metric Cards */}
       {data && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2 hover:border-indigo-300 transition-colors">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-extrabold uppercase tracking-wider">
               <span>Total Enrolled Students</span>
-              <div className="w-9 h-9 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
                 <Users className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-black text-slate-900">{data.cohortSummary.totalStudents}</p>
-            <p className="text-xs text-indigo-600 font-semibold">Active Full-Stack Trainees</p>
+            <p className="text-xs text-indigo-600 font-bold">Active Cohort Trainees</p>
           </div>
 
-          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
-              <span>Avg Cohort Completion</span>
-              <div className="w-9 h-9 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2 hover:border-emerald-300 transition-colors">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-extrabold uppercase tracking-wider">
+              <span>Cohort Avg Completion</span>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
                 <TrendingUp className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-black text-slate-900">{data.cohortSummary.avgCohortCompletion}%</p>
-            <p className="text-xs text-emerald-600 font-semibold">Course Progress Average</p>
+            <p className="text-xs text-emerald-600 font-bold">Course Completion Rate</p>
           </div>
 
-          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2 hover:border-purple-300 transition-colors">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-extrabold uppercase tracking-wider">
               <span>GitHub Submissions</span>
-              <div className="w-9 h-9 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600">
+              <div className="w-10 h-10 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
                 <Github className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-black text-slate-900">{data.cohortSummary.totalSubmissions}</p>
-            <p className="text-xs text-purple-600 font-semibold">Weekly Code Repositories</p>
+            <p className="text-xs text-purple-600 font-bold">Submitted Code Repositories</p>
           </div>
 
-          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-2 hover:border-amber-300 transition-colors">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-extrabold uppercase tracking-wider">
               <span>Quizzes Passed</span>
-              <div className="w-9 h-9 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
                 <Trophy className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-black text-slate-900">{data.cohortSummary.totalQuizzesPassed}</p>
-            <p className="text-xs text-amber-600 font-semibold">Passing Score Tests (≥70%)</p>
+            <p className="text-xs text-amber-600 font-bold">Passed Weekly Tests (≥70%)</p>
           </div>
         </div>
       )}
 
-      {/* Search & Filter Controls */}
+      {/* Search & Filter Controls Bar */}
       <div className="light-card p-6 rounded-3xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -300,13 +311,13 @@ export default function TrainerPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search student by name or email..."
-            className="w-full pl-10 pr-4 py-2.5 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+            placeholder="Search student by name or email address..."
+            className="w-full pl-10 pr-4 py-2.5 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-900"
           />
         </div>
 
         <div className="flex items-center space-x-2 w-full sm:w-auto">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex-shrink-0">
+          <span className="text-xs font-black text-slate-500 uppercase tracking-wider flex-shrink-0">
             Filter Status:
           </span>
           <select
@@ -314,7 +325,7 @@ export default function TrainerPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full sm:w-auto text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
           >
-            <option value="all">All Students ({data?.students?.length || 0})</option>
+            <option value="all">All Trainees ({data?.students?.length || 0})</option>
             <option value="high">Top Performers (≥75%)</option>
             <option value="active">In Progress (&gt;0%)</option>
             <option value="completed">Fully Completed (100%)</option>
@@ -323,7 +334,7 @@ export default function TrainerPage() {
         </div>
       </div>
 
-      {/* Student Cohort Roster Table / Grid */}
+      {/* Student Cohort Roster Table */}
       {loadingData ? (
         <div className="p-12 text-center space-y-4 light-card rounded-3xl border border-slate-200 bg-white">
           <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
@@ -338,13 +349,13 @@ export default function TrainerPage() {
         <div className="p-12 text-center space-y-3 light-card rounded-3xl border border-slate-200 bg-white">
           <Users className="w-10 h-10 text-slate-400 mx-auto" />
           <h3 className="text-base font-bold text-slate-800">No Students Found</h3>
-          <p className="text-xs text-slate-500">No registered student matches your query filters.</p>
+          <p className="text-xs text-slate-500">No registered student matches your search query or status filter.</p>
         </div>
       ) : (
         <div className="light-card rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+              <thead className="bg-slate-50 border-b border-slate-200 font-extrabold uppercase tracking-wider text-[10px] text-slate-500">
                 <tr>
                   <th className="py-4 px-6">Student Information</th>
                   <th className="py-4 px-6">Specialist Rank</th>
@@ -355,221 +366,89 @@ export default function TrainerPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Student Info */}
-                    <td className="py-4 px-6">
-                      <Link href={`/trainer/student/${student.id}`} className="flex items-center space-x-3 group">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-xs overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
-                          {student.avatar ? (
-                            <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
-                          ) : (
-                            student.name.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">{student.name}</p>
-                          <p className="text-slate-500 text-[11px]">{student.email}</p>
-                        </div>
-                      </Link>
-                    </td>
+                {filteredStudents.map((student) => {
+                  const studentSlug = getStudentSlug(student);
+                  const targetUrl = `/trainer/student/${studentSlug}`;
 
-                    {/* Rank Badge */}
-                    <td className="py-4 px-6">
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        <Award className="w-3 h-3 text-indigo-600" />
-                        <span>{student.rank}</span>
-                      </span>
-                    </td>
-
-                    {/* Lessons Progress */}
-                    <td className="py-4 px-6 text-center">
-                      <div className="max-w-[140px] mx-auto space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold">
-                          <span className="text-slate-800">{student.metrics.overallPercentage}%</span>
-                          <span className="text-slate-400">
-                            {student.metrics.completedLessonsCount}/{student.metrics.totalCourseLessons}
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                          <div
-                            className="h-full bg-indigo-600 transition-all duration-500 rounded-full"
-                            style={{ width: `${student.metrics.overallPercentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* GitHub Submissions Count */}
-                    <td className="py-4 px-6 text-center font-extrabold text-slate-900 text-sm">
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200">
-                        <Github className="w-3.5 h-3.5 text-purple-600" />
-                        <span>{student.metrics.assignmentsSubmittedCount} / 12</span>
-                      </span>
-                    </td>
-
-                    {/* Tests Passed Count */}
-                    <td className="py-4 px-6 text-center font-extrabold text-slate-900 text-sm">
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <Trophy className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{student.metrics.quizzesPassedCount} / 12</span>
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-4 px-6 text-right">
-                      <Link
-                        href={`/trainer/student/${student.id}`}
-                        className="inline-flex items-center space-x-1.5 gradient-bg-indigo text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs hover:scale-105 transition-all"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect Progress & Marks</span>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Detailed Student Progress Inspection Modal */}
-      {selectedStudent && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-3xl w-full max-h-[90vh] rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-2xl gradient-bg-indigo flex items-center justify-center text-white font-bold text-lg shadow-md">
-                  {selectedStudent.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-xl font-extrabold">{selectedStudent.name}</h3>
-                  <p className="text-xs text-slate-400 font-medium">{selectedStudent.email} • {selectedStudent.mobile}</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedStudent(null)}
-                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-6 overflow-y-auto flex-grow text-xs">
-              {/* Profile Links & Metrics Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Overall Completion</span>
-                  <span className="text-lg font-black text-indigo-600">{selectedStudent.metrics.overallPercentage}%</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Average Quiz Score</span>
-                  <span className="text-lg font-black text-emerald-600">{selectedStudent.metrics.avgQuizPercentage}%</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Resume File</span>
-                  {selectedStudent.resumeUrl ? (
-                    <a
-                      href={selectedStudent.resumeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-bold text-indigo-600 hover:underline inline-flex items-center space-x-1 mt-1"
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>Download Resume</span>
-                    </a>
-                  ) : (
-                    <span className="text-slate-400 font-medium">Not Uploaded</span>
-                  )}
-                </div>
-              </div>
-
-              {/* 12-Week Matrix List */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-800">
-                  12-Week Module Milestone Matrix
-                </h4>
-
-                <div className="space-y-2">
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((weekNum) => {
-                    const prog = selectedStudent.progressByWeek[weekNum];
-                    const sub = selectedStudent.submissionsByWeek[weekNum];
-                    const quiz = selectedStudent.quizzesByWeek[weekNum];
-
-                    return (
-                      <div
-                        key={weekNum}
-                        className="p-3.5 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs hover:bg-slate-50/50"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 font-extrabold text-xs flex items-center justify-center border border-indigo-200">
-                            W{weekNum}
-                          </span>
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50/80 transition-colors group">
+                      {/* Student Info (Name-based route link) */}
+                      <td className="py-4 px-6">
+                        <Link href={targetUrl} className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 flex items-center justify-center text-white font-extrabold text-sm shadow-xs overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+                            {student.avatar ? (
+                              <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+                            ) : (
+                              student.name.charAt(0).toUpperCase()
+                            )}
+                          </div>
                           <div>
-                            <p className="font-bold text-slate-900 text-xs">Week {weekNum} Curriculum</p>
-                            <p className="text-[11px] text-slate-500">
-                              Lessons: {prog ? `${prog.completedCount}/${prog.totalLessons}` : '0 Completed'}
+                            <p className="font-extrabold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors flex items-center space-x-1">
+                              <span>{student.name}</span>
+                              <ArrowUpRight className="w-3 h-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </p>
+                            <p className="text-slate-500 text-[11px] font-medium">{student.email}</p>
+                          </div>
+                        </Link>
+                      </td>
+
+                      {/* Rank Badge */}
+                      <td className="py-4 px-6">
+                        <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          <Award className="w-3 h-3 text-indigo-600" />
+                          <span>{student.rank}</span>
+                        </span>
+                      </td>
+
+                      {/* Lessons Progress */}
+                      <td className="py-4 px-6 text-center">
+                        <div className="max-w-[140px] mx-auto space-y-1">
+                          <div className="flex justify-between text-[11px] font-extrabold">
+                            <span className="text-slate-900">{student.metrics.overallPercentage}%</span>
+                            <span className="text-slate-400 font-semibold">
+                              {student.metrics.completedLessonsCount}/{student.metrics.totalCourseLessons}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                              className="h-full bg-indigo-600 transition-all duration-500 rounded-full"
+                              style={{ width: `${student.metrics.overallPercentage}%` }}
+                            ></div>
                           </div>
                         </div>
+                      </td>
 
-                        <div className="flex items-center space-x-2 w-full sm:w-auto">
-                          {/* GitHub Submission Link */}
-                          {sub ? (
-                            <a
-                              href={sub.submissionUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[11px] inline-flex items-center space-x-1 hover:underline"
-                            >
-                              <Github className="w-3.5 h-3.5 text-purple-600" />
-                              <span>View Repo</span>
-                              <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
-                            </a>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 text-[11px] font-medium">
-                              No Repo
-                            </span>
-                          )}
+                      {/* GitHub Submissions Count */}
+                      <td className="py-4 px-6 text-center font-extrabold text-slate-900 text-sm">
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs">
+                          <Github className="w-3.5 h-3.5 text-purple-600" />
+                          <span>{student.metrics.assignmentsSubmittedCount} / 12</span>
+                        </span>
+                      </td>
 
-                          {/* Quiz Score Badge */}
-                          {quiz ? (
-                            <span
-                              className={`px-2.5 py-1 rounded-lg font-bold text-[11px] border inline-flex items-center space-x-1 ${
-                                quiz.passed
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                  : 'bg-red-50 text-red-700 border-red-200'
-                              }`}
-                            >
-                              <Trophy className="w-3.5 h-3.5" />
-                              <span>Quiz: {quiz.percentage}% ({quiz.passed ? 'PASSED' : 'FAILED'})</span>
-                            </span>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 text-[11px] font-medium">
-                              No Test Score
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+                      {/* Tests Passed Count */}
+                      <td className="py-4 px-6 text-center font-extrabold text-slate-900 text-sm">
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs">
+                          <Trophy className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{student.metrics.quizzesPassedCount} / 12</span>
+                        </span>
+                      </td>
 
-            {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-              <button
-                onClick={() => setSelectedStudent(null)}
-                className="px-5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800"
-              >
-                Close Inspection
-              </button>
-            </div>
+                      {/* Action Button: Links directly to /trainer/student/[name] */}
+                      <td className="py-4 px-6 text-right">
+                        <Link
+                          href={targetUrl}
+                          className="inline-flex items-center space-x-1.5 gradient-bg-indigo text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow-xs hover:scale-105 transition-all"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect Student Marks</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
