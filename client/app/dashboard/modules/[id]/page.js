@@ -358,18 +358,25 @@ export default function ModuleDetailsPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200 gap-3">
                   <div className="flex items-center space-x-3">
-                    <FileCode className="w-5 h-5 text-indigo-600" />
+                    <FileCode className="w-6 h-6 text-indigo-600 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-bold text-slate-900">GitHub Code Repository Starter</p>
-                      <p className="text-xs text-slate-500 font-medium">Official starter code for Week {moduleItem.weekNumber}</p>
+                      <p className="text-sm font-extrabold text-slate-900">
+                        {moduleItem.assignment?.title || `Week ${moduleItem.weekNumber} Starter Template`}
+                      </p>
+                      <p className="text-xs text-slate-600 font-medium">
+                        Starter File: <span className="font-mono text-indigo-700 font-bold">{moduleItem.assignment?.starterFileName || 'index.js'}</span> ({moduleItem.assignment?.points || 100} Points)
+                      </p>
                     </div>
                   </div>
-                  <button className="px-3.5 py-2 rounded-xl gradient-bg-indigo text-white text-xs font-bold inline-flex items-center space-x-1 shadow-xs">
-                    <span>View Repository</span>
+                  <Link
+                    href={`/dashboard/modules/${moduleItem.weekNumber}/assignment`}
+                    className="px-4 py-2.5 rounded-xl gradient-bg-indigo text-white text-xs font-black inline-flex items-center justify-center space-x-1.5 shadow-md hover:scale-[1.02] transition-all self-start sm:self-auto"
+                  >
+                    <span>View Starter Code & Submit Project</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-200">

@@ -56,6 +56,16 @@ mongoose
     if (count === 0) {
       console.log('Seeding initial 12-week curriculum data...');
       await CourseModule.insertMany(curriculumSeedData);
+    } else {
+      for (const seedItem of curriculumSeedData) {
+        const existingMod = await CourseModule.findOne({ weekNumber: seedItem.weekNumber });
+        if (!existingMod) {
+          await CourseModule.create(seedItem);
+        } else if (!existingMod.assignment || !existingMod.assignment.starterCode || existingMod.assignment.starterRepoUrl.includes('starter-template')) {
+          existingMod.assignment = seedItem.assignment;
+          await existingMod.save();
+        }
+      }
     }
 
     const testEmail = 'b.kumarshaw94@gmail.com';
