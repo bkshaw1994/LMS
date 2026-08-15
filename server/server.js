@@ -8,6 +8,8 @@ const modulesRoutes = require('./routes/modules');
 const progressRoutes = require('./routes/progress');
 const assignmentsRoutes = require('./routes/assignments');
 const quizzesRoutes = require('./routes/quizzes');
+const trainerRoutes = require('./routes/trainer');
+const User = require('./models/User');
 const { curriculumSeedData } = require('./seed');
 
 const app = express();
@@ -23,6 +25,7 @@ app.use('/api/modules', modulesRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/assignments', assignmentsRoutes);
 app.use('/api/quizzes', quizzesRoutes);
+app.use('/api/trainer', trainerRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -41,6 +44,20 @@ mongoose
     if (count === 0) {
       console.log('Seeding initial 12-week curriculum data...');
       await CourseModule.insertMany(curriculumSeedData);
+    }
+
+    // Seed default Trainer user if not exists
+    const existingTrainer = await User.findOne({ role: 'trainer' });
+    if (!existingTrainer) {
+      console.log('Seeding default Trainer user (trainer@lms.com / trainer123)...');
+      await User.create({
+        name: 'Lead Trainer',
+        email: 'trainer@lms.com',
+        password: 'trainer123',
+        role: 'trainer',
+        mobile: '+1 (555) 019-2831',
+      });
+      console.log('Default Trainer account created successfully!');
     }
   })
   .catch((err) => {
