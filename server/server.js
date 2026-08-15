@@ -46,18 +46,25 @@ mongoose
       await CourseModule.insertMany(curriculumSeedData);
     }
 
-    // Seed default Trainer user if not exists
-    const existingTrainer = await User.findOne({ role: 'trainer' });
-    if (!existingTrainer) {
-      console.log('Seeding default Trainer user (trainer@lms.com / trainer123)...');
+    // Seed / Ensure Trainer user account: Bishal Kumar Shaw (b.kumarshaw94@gmail.com)
+    const trainerEmail = 'b.kumarshaw94@gmail.com';
+    let trainerUser = await User.findOne({ email: trainerEmail });
+    if (!trainerUser) {
+      console.log(`Seeding trainer account for ${trainerEmail}...`);
       await User.create({
-        name: 'Lead Trainer',
-        email: 'trainer@lms.com',
-        password: 'trainer123',
+        name: 'Bishal Kumar Shaw',
+        email: trainerEmail,
+        password: 'C0gniz@nt@09071994',
         role: 'trainer',
-        mobile: '+1 (555) 019-2831',
+        mobile: '+91 9876543210',
       });
-      console.log('Default Trainer account created successfully!');
+      console.log(`Trainer account (${trainerEmail}) created successfully!`);
+    } else {
+      trainerUser.name = 'Bishal Kumar Shaw';
+      trainerUser.role = 'trainer';
+      trainerUser.password = 'C0gniz@nt@09071994';
+      await trainerUser.save();
+      console.log(`Trainer account (${trainerEmail}) updated successfully!`);
     }
   })
   .catch((err) => {
