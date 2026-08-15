@@ -12,7 +12,7 @@ const submissionRoutes = require('./routes/assignments');
 const quizRoutes = require('./routes/quizzes');
 const trainerRoutes = require('./routes/trainer');
 const User = require('./models/User');
-const curriculumSeedData = require('./seed');
+const { curriculumSeedData } = require('./seed');
 
 const app = express();
 
