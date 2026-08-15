@@ -34,7 +34,7 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(email, password, 'student');
       if (loggedUser) {
         if (loggedUser.role === 'trainer' || loggedUser.role === 'admin' || loggedUser.role === 'instructor') {
           logout();

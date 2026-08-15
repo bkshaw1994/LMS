@@ -48,7 +48,7 @@ mongoose
 
     // Seed / Ensure Trainer user account: Bishal Kumar Shaw (b.kumarshaw94@gmail.com)
     const trainerEmail = 'b.kumarshaw94@gmail.com';
-    let trainerUser = await User.findOne({ email: trainerEmail });
+    let trainerUser = await User.findOne({ email: trainerEmail, role: 'trainer' });
     if (!trainerUser) {
       console.log(`Seeding trainer account for ${trainerEmail}...`);
       await User.create({
@@ -61,7 +61,6 @@ mongoose
       console.log(`Trainer account (${trainerEmail}) created successfully!`);
     } else {
       trainerUser.name = 'Bishal Kumar Shaw';
-      trainerUser.role = 'trainer';
       trainerUser.password = 'C0gniz@nt@09071994';
       await trainerUser.save();
       console.log(`Trainer account (${trainerEmail}) updated successfully!`);

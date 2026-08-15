@@ -80,7 +80,7 @@ export default function TrainerPage() {
     setIsSubmitting(true);
 
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(email, password, 'trainer');
       if (loggedUser) {
         if (loggedUser.role !== 'trainer' && loggedUser.role !== 'admin' && loggedUser.role !== 'instructor') {
           logout();

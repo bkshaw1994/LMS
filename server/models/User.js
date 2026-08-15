@@ -10,7 +10,6 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Please provide an email'],
-    unique: true,
     lowercase: true,
     trim: true,
     match: [
@@ -49,6 +48,9 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Compound unique index allowing a user to have a Student account and a Trainer account with the same email
+UserSchema.index({ email: 1, role: 1 }, { unique: true });
 
 // Encrypt password before saving user document
 UserSchema.pre('save', async function (next) {
