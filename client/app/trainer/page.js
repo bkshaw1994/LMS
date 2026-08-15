@@ -265,7 +265,15 @@ export default function TrainerPage() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/trainer/assignments"
+              className="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Update Weekly Assignments</span>
+            </Link>
+
             <button
               onClick={loadTrainerData}
               disabled={loadingData}

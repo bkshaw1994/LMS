@@ -331,4 +331,63 @@ router.get('/student/:identifier', protect, authorizeTrainer, async (req, res) =
   }
 });
 
+// @route   GET /api/trainer/assignments
+// @desc    Get all 12 modules with project assignment details for editing
+// @access  Private (Trainer/Admin only)
+router.get('/assignments', protect, authorizeTrainer, async (req, res) => {
+  try {
+    const modules = await CourseModule.find().sort({ weekNumber: 1 });
+    res.status(200).json({
+      success: true,
+      modules,
+    });
+  } catch (error) {
+    console.error('Error fetching trainer assignments:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching assignments', error: error.message });
+  }
+});
+
+// @route   PUT /api/trainer/assignment/:weekNumber
+// @desc    Update assignment title, description, requirements, starter code & template repo for a week
+// @access  Private (Trainer/Admin only)
+router.put('/assignment/:weekNumber', protect, authorizeTrainer, async (req, res) => {
+  try {
+    const weekNumber = parseInt(req.params.weekNumber);
+    const { title, description, requirements, starterRepoUrl, starterFileName, starterCode, points } = req.body;
+
+    const moduleItem = await CourseModule.findOne({ weekNumber });
+    if (!moduleItem) {
+      return res.status(404).json({ success: false, message: `Course module for Week ${weekNumber} not found` });
+    }
+
+    if (!moduleItem.assignment) {
+      moduleItem.assignment = {};
+    }
+
+    if (title !== undefined) moduleItem.assignment.title = title;
+    if (description !== undefined) moduleItem.assignment.description = description;
+    if (requirements !== undefined) {
+      moduleItem.assignment.requirements = Array.isArray(requirements)
+        ? requirements
+        : (typeof requirements === 'string' ? requirements.split('\n').filter(r => r.trim()) : []);
+    }
+    if (starterRepoUrl !== undefined) moduleItem.assignment.starterRepoUrl = starterRepoUrl;
+    if (starterFileName !== undefined) moduleItem.assignment.starterFileName = starterFileName;
+    if (starterCode !== undefined) moduleItem.assignment.starterCode = starterCode;
+    if (points !== undefined) moduleItem.assignment.points = parseInt(points) || 100;
+
+    await moduleItem.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully updated Week ${weekNumber} project assignment!`,
+      assignment: moduleItem.assignment,
+      module: moduleItem,
+    });
+  } catch (error) {
+    console.error('Error updating trainer assignment:', error);
+    res.status(500).json({ success: false, message: 'Server error updating assignment', error: error.message });
+  }
+});
+
 module.exports = router;
