@@ -203,20 +203,6 @@ export default function TrainerPage() {
                 )}
               </button>
             </form>
-
-            {/* Quick Demo Credentials Box */}
-            <div className="pt-4 border-t border-slate-100 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs space-y-1">
-              <div className="flex items-center space-x-1.5 text-indigo-700 font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Default Seeded Trainer Credentials:</span>
-              </div>
-              <p className="text-slate-600 font-mono text-[11px] pt-1">
-                <strong>Email:</strong> trainer@lms.com
-              </p>
-              <p className="text-slate-600 font-mono text-[11px]">
-                <strong>Password:</strong> trainer123
-              </p>
-            </div>
           </div>
         </div>
       </div>
