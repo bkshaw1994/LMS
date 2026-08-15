@@ -81,17 +81,17 @@ export default function TrainerAssignmentsPage() {
           ? mod.assignment.requirements.join('\n')
           : mod.assignment.requirements || ''
       );
-      setStarterRepoUrl(mod.assignment.starterRepoUrl || 'https://github.com/fullstack-bootcamp/starter-template');
-      setStarterFileName(mod.assignment.starterFileName || 'index.js');
-      setStarterCode(mod.assignment.starterCode || '// Starter code\nconsole.log("Hello Bootcamp");');
+      setStarterRepoUrl(mod.assignment.starterRepoUrl || '');
+      setStarterFileName(mod.assignment.starterFileName || '');
+      setStarterCode(mod.assignment.starterCode || '');
       setPoints(mod.assignment.points || 100);
     } else {
-      setTitle(`Week ${weekNum} Capstone Project`);
-      setDescription(`Complete the full-stack project requirements for Week ${weekNum}.`);
-      setRequirementsText('Build modern UI components\nImplement responsive layouts\nPush clean code to GitHub repository');
-      setStarterRepoUrl('https://github.com/fullstack-bootcamp/starter-template');
-      setStarterFileName('index.js');
-      setStarterCode('// Starter code template');
+      setTitle(`Week ${weekNum} Project Assignment`);
+      setDescription(`Complete the project requirements for Week ${weekNum}.`);
+      setRequirementsText('Implement application requirements\nSubmit public GitHub repository link');
+      setStarterRepoUrl('');
+      setStarterFileName('');
+      setStarterCode('');
       setPoints(100);
     }
     setSelectedWeek(weekNum);
@@ -329,34 +329,34 @@ export default function TrainerAssignmentsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                Starter GitHub Template Repo URL
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span>Starter GitHub Template Repo</span>
+                <span className="text-[10px] text-slate-400 font-semibold lowercase">(optional)</span>
               </label>
               <div className="relative">
                 <Github className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="url"
-                  required
                   value={starterRepoUrl}
                   onChange={(e) => setStarterRepoUrl(e.target.value)}
-                  placeholder="https://github.com/org/repo-template"
+                  placeholder="https://github.com/org/repo-template (Optional)"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-xs font-semibold text-slate-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-                Starter File Name
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span>Starter File Name</span>
+                <span className="text-[10px] text-slate-400 font-semibold lowercase">(optional)</span>
               </label>
               <div className="relative">
                 <FileCode2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="text"
-                  required
                   value={starterFileName}
                   onChange={(e) => setStarterFileName(e.target.value)}
-                  placeholder="index.js or App.jsx"
+                  placeholder="index.js or App.jsx (Optional)"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-xs font-semibold text-slate-900"
                 />
               </div>
@@ -392,14 +392,15 @@ export default function TrainerAssignmentsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-              Starter File Template Code (`{starterFileName}`)
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Starter Code Template Snippet</span>
+              <span className="text-[10px] text-slate-400 font-semibold lowercase">(optional)</span>
             </label>
             <textarea
-              rows={5}
+              rows={4}
               value={starterCode}
               onChange={(e) => setStarterCode(e.target.value)}
-              placeholder="// Write starter code for students..."
+              placeholder="// Optional starter code snippet for students..."
               className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-indigo-300 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
             />
           </div>
@@ -467,16 +468,18 @@ export default function TrainerAssignmentsPage() {
                 </div>
               </div>
 
-              {/* Starter File Code Box */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-500 uppercase">
-                  <span>Starter Template Code</span>
-                  <span className="text-indigo-600 font-mono">{starterFileName}</span>
+              {/* Starter File Code Box (Only if provided) */}
+              {starterCode && (
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-500 uppercase">
+                    <span>Starter Template Code</span>
+                    <span className="text-indigo-600 font-mono">{starterFileName || 'Code'}</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-slate-950 text-indigo-300 font-mono text-[11px] overflow-x-auto max-h-40">
+                    <pre>{starterCode}</pre>
+                  </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-slate-950 text-indigo-300 font-mono text-[11px] overflow-x-auto max-h-40">
-                  <pre>{starterCode || '// Starter code snippet'}</pre>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
