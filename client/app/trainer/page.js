@@ -190,7 +190,7 @@ export default function TrainerPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="b.kumarshaw94@gmail.com"
+                    placeholder="trainer@example.com"
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm font-medium text-slate-900 bg-slate-50/50"
                   />
                 </div>
