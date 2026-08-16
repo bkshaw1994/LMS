@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../lib/authContext';
+import { fetchApi } from '../lib/api';
 import { 
   LogOut, 
   LayoutDashboard, 
@@ -31,6 +32,17 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Automatically log website page view (tracks both guest visitors not logged in yet & logged-in students)
+  useEffect(() => {
+    try {
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+      fetchApi('/visitors/log', {
+        method: 'POST',
+        body: JSON.stringify({ path: currentPath }),
+      }).catch(() => {});
+    } catch (e) {}
+  }, [user]);
 
   return (
     <header className="sticky top-0 z-50 light-nav transition-all">

@@ -175,6 +175,37 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'LMS Backend Server is running smoothly', swaggerDocs: '/api-docs' });
 });
 
+// Public endpoint to explicitly log page visits for guests (not logged in yet) & students
+app.post('/api/visitors/log', async (req, res) => {
+  try {
+    const { path } = req.body || {};
+    const rawIp =
+      req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+      req.headers['x-real-ip'] ||
+      req.socket.remoteAddress ||
+      req.ip ||
+      '127.0.0.1';
+
+    const userAgent = req.headers['user-agent'] || '';
+
+    let userObj = null;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.id) {
+          userObj = await User.findById(decoded.id).select('name email role');
+        }
+      } catch (e) {}
+    }
+
+    const visitor = await Visitor.logVisit(rawIp, userAgent, path || '/', userObj);
+    return res.status(200).json({ success: true, visitor });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Register API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/modules', moduleRoutes);
