@@ -11,8 +11,11 @@ const progressRoutes = require('./routes/progress');
 const submissionRoutes = require('./routes/assignments');
 const quizRoutes = require('./routes/quizzes');
 const trainerRoutes = require('./routes/trainer');
+const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Visitor = require('./models/Visitor');
 const { curriculumSeedData } = require('./seed');
+const { JWT_SECRET } = require('./middleware/auth');
 const { swaggerUi, swaggerSpec, customSwaggerOptions } = require('./config/swagger');
 
 const app = express();
@@ -97,6 +100,51 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Middleware to automatically track visitor IP addresses, visit counts, and logged-in student profiles
+app.use(async (req, res, next) => {
+  // Ignore static assets, swagger docs, and favicon requests
+  const path = req.path || '';
+  if (
+    path.startsWith('/api-docs') ||
+    path.startsWith('/docs') ||
+    path.includes('favicon') ||
+    path.endsWith('.js') ||
+    path.endsWith('.css') ||
+    path.endsWith('.png') ||
+    path.endsWith('.ico')
+  ) {
+    return next();
+  }
+
+  const rawIp =
+    req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    req.socket.remoteAddress ||
+    req.ip ||
+    '127.0.0.1';
+
+  const userAgent = req.headers['user-agent'] || '';
+
+  // Extract user info if Authorization Bearer token is present
+  let userObj = null;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded && decoded.id) {
+        userObj = await User.findById(decoded.id).select('name email role');
+      }
+    } catch (e) {
+      // Ignore token verification errors in tracking middleware
+    }
+  }
+
+  // Asynchronously record visit without delaying request processing
+  Visitor.logVisit(rawIp, userAgent, path, userObj).catch(() => {});
+
+  next();
+});
+
 // Ensure trailing slash for Swagger UI routes to resolve relative asset paths
 app.use((req, res, next) => {
   if (req.path === '/api-docs' || req.path === '/docs') {
@@ -125,6 +173,37 @@ app.get('/', (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'LMS Backend Server is running smoothly', swaggerDocs: '/api-docs' });
+});
+
+// Public endpoint to explicitly log page visits for guests (not logged in yet) & students
+app.post('/api/visitors/log', async (req, res) => {
+  try {
+    const { path } = req.body || {};
+    const rawIp =
+      req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+      req.headers['x-real-ip'] ||
+      req.socket.remoteAddress ||
+      req.ip ||
+      '127.0.0.1';
+
+    const userAgent = req.headers['user-agent'] || '';
+
+    let userObj = null;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.id) {
+          userObj = await User.findById(decoded.id).select('name email role');
+        }
+      } catch (e) {}
+    }
+
+    const visitor = await Visitor.logVisit(rawIp, userAgent, path || '/', userObj);
+    return res.status(200).json({ success: true, visitor });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Register API Routes
