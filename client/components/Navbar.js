@@ -11,7 +11,8 @@ import {
   X, 
   ChevronDown,
   User,
-  GraduationCap
+  GraduationCap,
+  Globe
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -84,14 +85,24 @@ export default function Navbar() {
                     </div>
 
                     {(user.role === 'trainer' || user.role === 'admin' || user.role === 'instructor') ? (
-                      <Link
-                        href="/trainer"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
-                      >
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
-                        <span>Instructor Portal</span>
-                      </Link>
+                      <>
+                        <Link
+                          href="/trainer"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
+                        >
+                          <Sparkles className="w-4 h-4 text-indigo-600" />
+                          <span>Instructor Portal</span>
+                        </Link>
+                        <Link
+                          href="/trainer/visitors"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/80 transition-colors"
+                        >
+                          <Globe className="w-4 h-4 text-indigo-600" />
+                          <span>Visitor Analytics</span>
+                        </Link>
+                      </>
                     ) : (
                       <>
                         <Link

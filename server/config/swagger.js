@@ -477,6 +477,17 @@ const options = {
           },
         },
       },
+      '/api/trainer/visitors': {
+        get: {
+          summary: 'Get IP visitor logs & analytics metrics',
+          tags: ['Trainer Dashboard'],
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: 'Visitor IP count list & metrics retrieved successfully' },
+            403: { description: 'Forbidden - Trainer authorization required' },
+          },
+        },
+      },
     },
   },
   apis: ['./routes/*.js'],

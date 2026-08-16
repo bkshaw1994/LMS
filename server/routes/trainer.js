@@ -5,6 +5,7 @@ const Progress = require('../models/Progress');
 const Submission = require('../models/Submission');
 const QuizResult = require('../models/QuizResult');
 const CourseModule = require('../models/CourseModule');
+const Visitor = require('../models/Visitor');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -387,6 +388,54 @@ router.put('/assignment/:weekNumber', protect, authorizeTrainer, async (req, res
   } catch (error) {
     console.error('Error updating trainer assignment:', error);
     res.status(500).json({ success: false, message: 'Server error updating assignment', error: error.message });
+  }
+});
+
+// @route   GET /api/trainer/visitors
+// @desc    Get IP visitor tracking logs & analytics metrics for students and guests
+// @access  Private (Trainer/Admin only)
+router.get('/visitors', protect, authorizeTrainer, async (req, res) => {
+  try {
+    const visitors = await Visitor.find().populate('user', 'name email role avatar').sort({ lastVisitedAt: -1 });
+
+    const totalUniqueVisitors = visitors.length;
+    const totalPageVisits = visitors.reduce((sum, v) => sum + (v.visitCount || 0), 0);
+
+    const studentVisitorsCount = visitors.filter((v) => v.userRole === 'student' || (v.user && v.user.role === 'student')).length;
+    const guestVisitorsCount = visitors.filter((v) => !v.userRole || v.userRole === 'guest').length;
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const activeToday = visitors.filter((v) => new Date(v.lastVisitedAt) >= twentyFourHoursAgo).length;
+
+    res.status(200).json({
+      success: true,
+      metrics: {
+        totalUniqueVisitors,
+        totalPageVisits,
+        studentVisitorsCount,
+        guestVisitorsCount,
+        activeToday,
+      },
+      visitors,
+    });
+  } catch (error) {
+    console.error('Error fetching visitor tracking logs:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching visitor list', error: error.message });
+  }
+});
+
+// @route   DELETE /api/trainer/visitors/:id
+// @desc    Remove a visitor IP log entry
+// @access  Private (Trainer/Admin only)
+router.delete('/visitors/:id', protect, authorizeTrainer, async (req, res) => {
+  try {
+    const visitor = await Visitor.findByIdAndDelete(req.params.id);
+    if (!visitor) {
+      return res.status(404).json({ success: false, message: 'Visitor record not found' });
+    }
+    res.status(200).json({ success: true, message: 'Visitor IP entry deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error deleting visitor log', error: error.message });
   }
 });
 

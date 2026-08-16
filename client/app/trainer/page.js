@@ -28,6 +28,7 @@ import {
   ChevronRight,
   TrendingUp,
   AlertCircle,
+  Globe,
   ArrowUpRight
 } from 'lucide-react';
 
@@ -266,6 +267,14 @@ export default function TrainerPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/trainer/visitors"
+              className="inline-flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Visitor Analytics & IPs</span>
+            </Link>
+
             <Link
               href="/trainer/assignments"
               className="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
