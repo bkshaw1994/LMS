@@ -22,14 +22,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: email.toLowerCase().trim(), role: 'student' });
     if (userExists) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      return res.status(400).json({ success: false, message: 'Student account already exists with this email' });
     }
 
     const user = await User.create({
       name,
-      email,
+      email: email.toLowerCase().trim(),
       password,
       role: 'student',
     });
@@ -56,17 +56,24 @@ router.post('/register', async (req, res) => {
 });
 
 // @route   POST /api/auth/login
-// @desc    Authenticate student & get token
+// @desc    Authenticate user & get token (supports role-based account separation)
 // @access  Public
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    let userQuery = { email: email.toLowerCase().trim() };
+    if (role === 'trainer') {
+      userQuery.role = { $in: ['trainer', 'admin', 'instructor'] };
+    } else if (role === 'student') {
+      userQuery.role = 'student';
+    }
+
+    const user = await User.findOne(userQuery).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }

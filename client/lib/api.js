@@ -1,4 +1,14 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const getApiBaseUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+  url = url.replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url += '/api';
+  }
+  return url;
+};
+
+const API_BASE = getApiBaseUrl();
+
 
 export const fetchApi = async (endpoint, options = {}) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
