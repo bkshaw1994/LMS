@@ -73,6 +73,14 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Ensure trailing slash for Swagger UI routes to resolve relative asset paths
+app.use((req, res, next) => {
+  if (req.path === '/api-docs' || req.path === '/docs') {
+    return res.redirect(301, req.path + '/');
+  }
+  next();
+});
+
 // Serve Swagger UI API Documentation Dashboard
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, customSwaggerOptions));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, customSwaggerOptions));
