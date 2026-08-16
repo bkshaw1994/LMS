@@ -13,6 +13,7 @@ const quizRoutes = require('./routes/quizzes');
 const trainerRoutes = require('./routes/trainer');
 const User = require('./models/User');
 const { curriculumSeedData } = require('./seed');
+const { swaggerUi, swaggerSpec, customSwaggerOptions } = require('./config/swagger');
 
 const app = express();
 
@@ -72,14 +73,26 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Root route for Vercel deployment health check
+// Serve Swagger UI API Documentation Dashboard
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, customSwaggerOptions));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, customSwaggerOptions));
+app.get('/api/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Root route for Vercel deployment health check & Swagger redirect link
 app.get('/', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'LMS Express Backend Server is running on Vercel' });
+  res.status(200).json({
+    status: 'ok',
+    message: 'LMS Express Backend Server is running on Vercel',
+    swaggerDocs: '/api-docs',
+  });
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'LMS Backend Server is running smoothly' });
+  res.status(200).json({ status: 'ok', message: 'LMS Backend Server is running smoothly', swaggerDocs: '/api-docs' });
 });
 
 // Register API Routes
@@ -92,13 +105,14 @@ app.use('/api/trainer', trainerRoutes);
 
 // Catch-all 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found', path: req.path });
+  res.status(404).json({ error: 'Endpoint not found', path: req.path, swaggerDocs: '/api-docs' });
 });
 
 // Standalone listener for local dev
 if (process.env.NODE_ENV !== 'production' || require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 LMS Express Backend Server running on port ${PORT}`);
+    console.log(`📑 Swagger Documentation available at http://localhost:${PORT}/api-docs`);
   });
 }
 

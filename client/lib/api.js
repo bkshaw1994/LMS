@@ -1,4 +1,12 @@
 const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.includes('localhost'))
+        ? process.env.NEXT_PUBLIC_API_URL
+        : 'http://localhost:5001/api';
+    }
+  }
   let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
   url = url.replace(/\/+$/, '');
   if (!url.endsWith('/api')) {
@@ -7,10 +15,8 @@ const getApiBaseUrl = () => {
   return url;
 };
 
-const API_BASE = getApiBaseUrl();
-
-
 export const fetchApi = async (endpoint, options = {}) => {
+  const apiBase = getApiBaseUrl();
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const headers = {
     'Content-Type': 'application/json',
@@ -19,7 +25,7 @@ export const fetchApi = async (endpoint, options = {}) => {
   };
 
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
+    const res = await fetch(`${apiBase}${endpoint}`, {
       ...options,
       headers,
     });
