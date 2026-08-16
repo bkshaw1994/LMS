@@ -24,7 +24,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Database connection helper for serverless environment
 const PORT = process.env.PORT || 5001;
-const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/lms_db';
+const rawMongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/lms_db';
+// Sanitize URI: strip quotes, whitespace, or line breaks accidentally pasted into Vercel UI
+const MONGO_URI = rawMongoUri.trim().replace(/^["']|["']$/g, '').trim();
 
 let dbPromise = null;
 
@@ -33,6 +35,10 @@ const connectDB = async () => {
 
   if ((!process.env.MONGODB_URI && !process.env.MONGO_URI) && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
     throw new Error('MONGODB_URI environment variable is missing in Vercel deployment settings. Please configure MONGODB_URI under Vercel project Settings -> Environment Variables.');
+  }
+
+  if (!MONGO_URI.startsWith('mongodb://') && !MONGO_URI.startsWith('mongodb+srv://')) {
+    throw new Error(`Invalid MONGODB_URI scheme (${MONGO_URI.substring(0, 10)}...). Expected connection string to start with "mongodb://" or "mongodb+srv://". Please check the MONGODB_URI value in Vercel Environment Variables.`);
   }
 
   if (!dbPromise) {
