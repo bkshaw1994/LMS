@@ -29,10 +29,18 @@ const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb:/
 let dbPromise = null;
 
 const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) return;
+  if (mongoose.connection.readyState >= 1) return;
+
+  if ((!process.env.MONGODB_URI && !process.env.MONGO_URI) && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+    throw new Error('MONGODB_URI environment variable is missing in Vercel deployment settings. Please configure MONGODB_URI under Vercel project Settings -> Environment Variables.');
+  }
+
   if (!dbPromise) {
     dbPromise = mongoose
-      .connect(MONGO_URI)
+      .connect(MONGO_URI, {
+        serverSelectionTimeoutMS: 5000,
+        bufferCommands: false,
+      })
       .then(async () => {
         console.log('MongoDB Atlas connected successfully');
         try {
@@ -61,7 +69,8 @@ const connectDB = async () => {
       })
       .catch((err) => {
         dbPromise = null;
-        console.warn('MongoDB connection warning:', err.message);
+        console.error('MongoDB connection error:', err.message);
+        throw err;
       });
   }
   await dbPromise;
@@ -69,8 +78,17 @@ const connectDB = async () => {
 
 // Ensure DB connection on each request for Vercel serverless functions
 app.use(async (req, res, next) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'Database Connection Failed',
+      error: err.message,
+      solution: '1. Add MONGODB_URI in Vercel Environment Variables. 2. Ensure MongoDB Atlas Network Access allows 0.0.0.0/0 (Allow access from anywhere).',
+    });
+  }
 });
 
 // Ensure trailing slash for Swagger UI routes to resolve relative asset paths
