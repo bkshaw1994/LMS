@@ -157,12 +157,9 @@ export default function StudentDashboard() {
   };
 
   // Helper: Is a week unlocked?
-  // Week 1 is ALWAYS unlocked. Week N unlocks when Week N-1 is 100% finished (quiz passed).
+  // Week lock system disabled - all weeks unlocked by default.
   const isModuleUnlocked = (mod) => {
-    if (!mod) return false;
-    if (mod.weekNumber === 1) return true;
-    const prevModule = modules.find(m => m.weekNumber === mod.weekNumber - 1);
-    return isModuleFullyCompleted(prevModule);
+    return true;
   };
 
   // Active unlocked module to study
@@ -199,7 +196,7 @@ export default function StudentDashboard() {
             Welcome back, <span className="gradient-text-light">{user?.name}</span>
           </h1>
           <p className="text-slate-600 text-sm max-w-xl leading-relaxed font-medium">
-            Step-by-step progression: Watch Lessons ➔ Submit GitHub Assignment ➔ Pass Knowledge Test ($\ge 70\%$) to unlock the next week!
+            Step-by-step progression: Watch Lessons ➔ Submit GitHub Assignment ➔ Pass Knowledge Test ($\ge 70\%$) for each week!
           </p>
         </div>
 
@@ -272,8 +269,8 @@ export default function StudentDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">12-Week Sequential Roadmap</h2>
-            <p className="text-slate-600 text-sm font-medium">Complete lessons, GitHub assignment, and pass the weekly test to unlock the next week.</p>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">12-Week Curriculum Roadmap</h2>
+            <p className="text-slate-600 text-sm font-medium">All 12 weeks are unlocked. Explore lessons, submit GitHub assignments, and complete weekly tests at your own pace.</p>
           </div>
         </div>
 

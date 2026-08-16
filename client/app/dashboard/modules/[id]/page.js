@@ -163,16 +163,9 @@ export default function ModuleDetailsPage() {
     );
   }
 
-  // Sequential lock check (Week N-1 must be completed to unlock Week N)
+  // Sequential lock check (Week lock system disabled - all weeks accessible)
   const isModuleLocked = () => {
-    if (moduleItem.weekNumber <= 1) return false;
-    const prevModule = allModules.find((m) => m.weekNumber === moduleItem.weekNumber - 1);
-    if (!prevModule) return false;
-
-    const prevProg = progressList.find((p) => extractId(p.module) === extractId(prevModule._id));
-    const completedCount = prevProg && prevProg.completedLessons ? prevProg.completedLessons.length : 0;
-    const totalCount = prevModule.lessons ? prevModule.lessons.length : 0;
-    return totalCount === 0 || completedCount < totalCount;
+    return false;
   };
 
   if (isModuleLocked()) {
